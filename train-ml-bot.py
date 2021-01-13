@@ -18,12 +18,14 @@ import sklearn.linear_model
 from sklearn.neural_network import MLPClassifier
 import joblib
 
-from bots.rand import rand
-# from bots.rdeep import rdeep
+# from bots.rand import rand
+from bots.rdeep import rdeep
 
 from bots.ml.ml import features
 
-def create_dataset(path, player=rand.Bot(), games=2000, phase=1):
+
+# TODO: Change line 27 and 165 with the number of good_games and bad_games
+def create_dataset(path, player=rdeep.Bot(), good_games=5000, bad_games=0, phase=1):  # change good/bad bot numbers
     """Create a dataset that can be used for training the ML bot model.
     The dataset is created by having the player (bot) play games against itself.
     The games parameter indicates how many games will be started.
@@ -37,8 +39,8 @@ def create_dataset(path, player=rand.Bot(), games=2000, phase=1):
     player -- the player which will play against itself, default the rand Bot
     games -- the number of games to play, default 2000
     phase -- wheter to start the games in phase 1, the default, or phase 2
-    """ 
-    
+    """
+
     data = []
     target = []
 
@@ -46,13 +48,15 @@ def create_dataset(path, player=rand.Bot(), games=2000, phase=1):
     bar_length = 30
     start = time.time()
 
-    for g in range(games-1):
+    for g in range(good_games - 1):
 
         # For progress bar
         if g % 10 == 0:
-            percent = 100.0*g/games
+            percent = 100.0 * g / good_games
             sys.stdout.write('\r')
-            sys.stdout.write("Generating dataset: [{:{}}] {:>3}%".format('='*int(percent/(100.0/bar_length)),bar_length, int(percent)))
+            sys.stdout.write(
+                "Generating good dataset: [{:{}}] {:>3}%".format('=' * int(percent / (100.0 / bar_length)), bar_length,
+                                                            int(percent)))
             sys.stdout.flush()
 
         # Randomly generate a state object starting in specified phase.
@@ -61,7 +65,6 @@ def create_dataset(path, player=rand.Bot(), games=2000, phase=1):
         state_vectors = []
 
         while not state.finished():
-
             # Give the state a signature if in phase 1, obscuring information that a player shouldn't see.
             given_state = state.clone(signature=state.whose_turn()) if state.get_phase() == 1 else state
 
@@ -75,6 +78,46 @@ def create_dataset(path, player=rand.Bot(), games=2000, phase=1):
         winner, score = state.winner()
 
         for state_vector in state_vectors:
+            data.append(state_vector)
+
+            if winner == 1:
+                result = 'won'
+
+            elif winner == 2:
+                result = 'lost'
+
+            target.append(result)
+
+    for g in range(bad_games - 1):  # the added section, entire for loop
+
+        # For progress bar
+        if g % 10 == 0:
+            percent = 100.0 * g / bad_games
+            sys.stdout.write('\r')
+            sys.stdout.write(
+                "Generating bad dataset: [{:{}}] {:>3}%".format('=' * int(percent / (100.0 / bar_length)), bar_length,
+                                                            int(percent)))
+            sys.stdout.flush()
+
+        # Randomly generate a state object starting in specified phase.
+        state = State.generate(phase=phase)
+
+        state_vectors = []
+
+        while not state.finished():
+            # Give the state a signature if in phase 1, obscuring information that a player shouldn't see.
+            given_state = state.clone(signature=state.whose_turn()) if state.get_phase() == 1 else state
+
+            # Add the features representation of a state to the state_vectors array
+            state_vectors.append(features(given_state))
+
+            # Advance to the next state
+            move = player.get_move(given_state)
+            state = state.next(move)
+
+        winner, score = state.winner()
+
+        for state_vector in state_vectors:  # TODO: Myléne - make changes here for random labels
             data.append(state_vector)
 
             if winner == 1:
@@ -117,11 +160,10 @@ parser.add_argument("--no-train",
                     action="store_false",
                     help="Don't train a model after generating dataset.")
 
-
 options = parser.parse_args()
 
 if options.overwrite or not os.path.isfile(options.dset_path):
-    create_dataset(options.dset_path, player=rand.Bot(), games=10000)
+    create_dataset(options.dset_path, player=rdeep.Bot(), good_games=5000, bad_games=0)
 
 if options.train:
 
@@ -151,7 +193,8 @@ if options.train:
         data, target = pickle.load(output)
 
     # Train a neural network
-    learner = MLPClassifier(hidden_layer_sizes=hidden_layer_sizes, learning_rate_init=learning_rate, alpha=regularization_strength, verbose=True, early_stopping=True, n_iter_no_change=6)
+    learner = MLPClassifier(hidden_layer_sizes=hidden_layer_sizes, learning_rate_init=learning_rate,
+                            alpha=regularization_strength, verbose=True, early_stopping=True, n_iter_no_change=6)
     # learner = sklearn.linear_model.LogisticRegression()
 
     model = learner.fit(data, target)
@@ -170,4 +213,4 @@ if options.train:
 
     end = time.time()
 
-    print('Done. Time to train:', (end-start)/60, 'minutes.')
+    print('Done. Time to train:', (end - start) / 60, 'minutes.')
