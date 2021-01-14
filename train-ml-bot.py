@@ -81,12 +81,13 @@ def create_dataset(path, player=rdeep.Bot(), good_games=0, bad_games=5000, phase
             data.append(state_vector)
 
             if winner == 1:
-                result = random.choice(['won', 'lost'])
+                result = 'won'
             elif winner == 2:
-                result = random.choice(['lost', 'won'])
+                result = 'lost'
 
             target.append(result)
         print(" This is the result %s" % result)
+
     for g in range(bad_games - 1):  # the added section, entire for loop
 
         # For progress bar
@@ -142,7 +143,7 @@ parser = ArgumentParser()
 parser.add_argument("-d", "--dset-path",
                     dest="dset_path",
                     help="Optional dataset path",
-                    default="dataset.pkl")
+                    default="0_dataset.pkl")
 
 parser.add_argument("-m", "--model-path",
                     dest="model_path",
