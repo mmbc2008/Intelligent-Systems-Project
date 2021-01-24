@@ -12,7 +12,7 @@ import joblib
 
 # Path of the model we will use. If you make a model
 # with a different name, point this line to its path.
-DEFAULT_MODEL = os.path.dirname(os.path.realpath(__file__)) + '/100_model.pkl'
+DEFAULT_MODEL = os.path.dirname(os.path.realpath(__file__)) + '/ml_models/60_model.pkl'
 
 class Bot:
 

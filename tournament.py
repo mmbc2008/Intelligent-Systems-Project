@@ -9,11 +9,12 @@ python play.py -h
 from argparse import ArgumentParser
 from api import State, util, engine
 import random, time
+random.seed(5)
 
 def run_tournament(options):
 
     botnames = options.players.split(",")
-
+    print(botnames)
     bots = []
     for botname in botnames:
         bots.append(util.load_player(botname))
@@ -35,7 +36,7 @@ def run_tournament(options):
                 p = [b, a]
 
             # Generate a state with a random seed
-            state = State.generate(phase=int(options.phase))
+            state = State.generate(random.randint(0,options.phase))
 
             winner, score = engine.play(bots[p[0]], bots[p[1]], state, options.max_time*1000, verbose=options.verbose, fast=options.fast)
 
@@ -64,7 +65,7 @@ if __name__ == "__main__":
     parser.add_argument("-p", "--players",
                         dest="players",
                         help="Comma-separated list of player names (enclose with quotes).",
-                        default="rand,bully,rdeep")
+                        default="rand,bully,rdeep,ml")
 
     parser.add_argument("-r", "--repeats",
                         dest="repeats",
