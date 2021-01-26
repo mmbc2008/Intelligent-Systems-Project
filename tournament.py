@@ -35,7 +35,11 @@ def run_tournament(options):
                 p = [b, a]
 
             # Generate a state with a random seed
+<<<<<<< Updated upstream
             state = State.generate(phase=int(options.phase))
+=======
+            state = State.generate(id = random.randint(0,options.phase), phase = 1)
+>>>>>>> Stashed changes
 
             winner, score = engine.play(bots[p[0]], bots[p[1]], state, options.max_time*1000, verbose=options.verbose, fast=options.fast)
 

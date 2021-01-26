@@ -79,6 +79,48 @@ def create_dataset(path, player=rand.Bot(), games=2000, phase=1):
 
             if winner == 1:
                 result = 'won'
+<<<<<<< Updated upstream
+=======
+            elif winner == 2:
+                result = 'lost'
+
+            target.append(result)
+
+    for g in range(bad_games - 1):  # the added section, entire for loop
+
+        # For progress bar
+        if g % 10 == 0:
+            percent = 100.0 * g / bad_games
+            sys.stdout.write('\r')
+            sys.stdout.write(
+                "Generating bad dataset: [{:{}}] {:>3}%".format('=' * int(percent / (100.0 / bar_length)), bar_length,
+                                                            int(percent)))
+            sys.stdout.flush()
+
+        # Randomly generate a state object starting in specified phase.
+        state = State.generate(phase=phase)
+
+        state_vectors = []
+
+        while not state.finished():
+            # Give the state a signature if in phase 1, obscuring information that a player shouldn't see.
+            given_state = state.clone(signature=state.whose_turn()) if state.get_phase() == 1 else state
+
+            # Add the features representation of a state to the state_vectors array
+            state_vectors.append(features(given_state))
+
+            # Advance to the next state
+            move = player.get_move(given_state)
+            state = state.next(move)
+
+        winner, score = state.winner()
+
+        for state_vector in state_vectors:  # TODO: Myléne - make changes here for random labels
+            data.append(state_vector)
+
+            if winner == 1:
+                result = random.choice(['won', 'lost'])
+>>>>>>> Stashed changes
 
             elif winner == 2:
                 result = 'lost'
@@ -100,12 +142,20 @@ parser = ArgumentParser()
 parser.add_argument("-d", "--dset-path",
                     dest="dset_path",
                     help="Optional dataset path",
+<<<<<<< Updated upstream
                     default="dataset.pkl")
+=======
+                    default="300_dataset.pkl")
+>>>>>>> Stashed changes
 
 parser.add_argument("-m", "--model-path",
                     dest="model_path",
                     help="Optional model path. Note that this path starts in bots/ml/ instead of the base folder, like dset_path above.",
+<<<<<<< Updated upstream
                     default="model.pkl")
+=======
+                    default="300_model.pkl")
+>>>>>>> Stashed changes
 
 parser.add_argument("-o", "--overwrite",
                     dest="overwrite",
@@ -121,7 +171,11 @@ parser.add_argument("--no-train",
 options = parser.parse_args()
 
 if options.overwrite or not os.path.isfile(options.dset_path):
+<<<<<<< Updated upstream
     create_dataset(options.dset_path, player=rand.Bot(), games=10000)
+=======
+    create_dataset(options.dset_path, player=rdeep.Bot(), good_games=1500, bad_games=3500)
+>>>>>>> Stashed changes
 
 if options.train:
 
