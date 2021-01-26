@@ -11,7 +11,7 @@ import os.path
 from argparse import ArgumentParser
 import time
 import sys
-
+import random
 # This package contains various machine learning algorithms
 import sklearn
 import sklearn.linear_model
@@ -25,7 +25,7 @@ from bots.ml.ml import features
 
 
 # TODO: Change line 27 and 165 with the number of good_games and bad_games
-def create_dataset(path, player=rdeep.Bot(), good_games=5000, bad_games=0, phase=1):  # change good/bad bot numbers
+def create_dataset(path, player=rdeep.Bot(), good_games=0, bad_games=5000, phase=1):  # change good/bad bot numbers
     """Create a dataset that can be used for training the ML bot model.
     The dataset is created by having the player (bot) play games against itself.
     The games parameter indicates how many games will be started.
@@ -82,11 +82,11 @@ def create_dataset(path, player=rdeep.Bot(), good_games=5000, bad_games=0, phase
 
             if winner == 1:
                 result = 'won'
-
             elif winner == 2:
                 result = 'lost'
 
             target.append(result)
+        print(" This is the result %s" % result)
 
     for g in range(bad_games - 1):  # the added section, entire for loop
 
@@ -121,10 +121,10 @@ def create_dataset(path, player=rdeep.Bot(), good_games=5000, bad_games=0, phase
             data.append(state_vector)
 
             if winner == 1:
-                result = 'won'
+                result = random.choice(['won', 'lost'])
 
             elif winner == 2:
-                result = 'lost'
+                result = random.choice(['won', 'lost'])
 
             target.append(result)
 
@@ -143,12 +143,12 @@ parser = ArgumentParser()
 parser.add_argument("-d", "--dset-path",
                     dest="dset_path",
                     help="Optional dataset path",
-                    default="dataset.pkl")
+                    default="0_dataset.pkl")
 
 parser.add_argument("-m", "--model-path",
                     dest="model_path",
                     help="Optional model path. Note that this path starts in bots/ml/ instead of the base folder, like dset_path above.",
-                    default="model.pkl")
+                    default="0_model.pkl")
 
 parser.add_argument("-o", "--overwrite",
                     dest="overwrite",
@@ -163,7 +163,7 @@ parser.add_argument("--no-train",
 options = parser.parse_args()
 
 if options.overwrite or not os.path.isfile(options.dset_path):
-    create_dataset(options.dset_path, player=rdeep.Bot(), good_games=5000, bad_games=0)
+    create_dataset(options.dset_path, player=rdeep.Bot(), good_games=0, bad_games=5000)
 
 if options.train:
 
